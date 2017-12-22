@@ -1,41 +1,27 @@
 var sendgrid = require('@sendgrid/mail');
-sendgrid.setApiKey('enter API key here');
+sendgrid.setApiKey('');
 sendgrid.setSubstitutionWrappers('{{', '}}');
 
 var fs = require('fs');
 
-var content = fs.readFileSync('vols.csv', 'utf-8');
-var rows = content.split('\n');
-
-var hour = 7;
-var min = 0;
-
-var getmin = function(n){
-	return n>9? ""+n: "0"+n;
-};
-
+var content = JSON.parse(fs.readFileSync('users.json', 'utf-8'));
 var html = fs.readFileSync('body.html', 'utf-8');
 
-for (var i = 0; i < rows.length; i++)
+for(var i=0; i<content.length; i++)
 {
-	var data = rows[i].split(",");
-
-	var params = {
-        to: data[1],
+    var params = {
+        to: content[i].email,
         from: {
-        	email: 'sender email',
-        	name: 'Gokulan Ravi'
+            email: 'queries@shaastra.org',
+            name: 'Shaastra 2018'
         },
-        subject: 'enter subject here ',
+        subject: 'Shaastra 2018 - Important Announcement',
         substitutions: {
-        	name: data[0],
-        	time: getmin(hour)+":"+getmin(min)
+            name: content[i].name,
+            festID: content[i].festID
         },
         html : html
     };
-
-	// sendgrid.send(params);
-    console.log(hour + ";" + min);
-	min = (min+10)%60;
-	if(min==0) hour+=1;
+    sendgrid.send(params);
+    console.log("sent to" + content[i].email, i+1)
 }
